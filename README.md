@@ -8,6 +8,7 @@ Operations
 ----------
 
 * run
+
 Similar to the famous jetty:run maven plugin. This goal will Setup and Start the Container, Deploy the given Archive, then wait for a JVM shutdown (ctrl+c), 
 for so to UnDeploy and Stop the Container. 
 
