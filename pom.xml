@@ -23,7 +23,7 @@
     </scm>
 
     <properties>
-        <version.maven_api>3.0</version.maven_api>
+        <version.maven>3.0</version.maven>
         <version.arquillian_core>1.0.0.CR1</version.arquillian_core>
 
         <version.jboss_spec>1.0.0.Final</version.jboss_spec>
@@ -54,7 +54,12 @@
             <dependency>
                 <groupId>org.apache.maven</groupId>
                 <artifactId>maven-plugin-api</artifactId>
-                <version>${version.maven_api}</version>
+                <version>${version.maven}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-compat</artifactId>
+                <version>${version.maven}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.spec.javax.servlet</groupId>

@@ -18,15 +18,20 @@
 package org.jboss.arquillian.maven;
 
 import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 import org.jboss.arquillian.container.spi.Container;
 import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
+import org.jboss.arquillian.container.spi.client.container.LifecycleException;
 import org.jboss.arquillian.container.spi.client.deployment.TargetDescription;
-import org.jboss.arquillian.core.impl.loadable.LoadableExtensionLoader;
 import org.jboss.arquillian.core.spi.Manager;
 import org.jboss.arquillian.core.spi.ManagerBuilder;
 import org.jboss.shrinkwrap.api.Archive;
@@ -40,10 +45,41 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
  * 
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  */
 abstract class BaseCommand extends AbstractMojo
 {
+   private static final String LOADABLE_EXTESION_LOADER_CLASS = "org.jboss.arquillian.core.impl.loadable.LoadableExtensionLoader";
+   
+   public enum ClassLoadingStrategy 
+   {
+      COMPILE,
+      TEST,
+      PLUGIN
+   }
+   
+   /**
+    * The maven project.
+    *
+    * @parameter expression="${project}"
+    */
+   private MavenProject project;
+
+   /**
+    * The ClassLoading strategy to use: TEST, COMPILE or PLUGIN.
+    * 
+    * @parameter property="classloading"
+    */
+   private ClassLoadingStrategy classLoadingStrategy = ClassLoadingStrategy.TEST; 
+
+   /**
+    * @param classLoadingStrategy the classLoadingStrategy to set
+    */
+   public void setClassloading(String classloading)
+   {
+      this.classLoadingStrategy = ClassLoadingStrategy.valueOf(classloading.toUpperCase());
+   }
+   
    /**
     * The target directory the application to be deployed is located.
     *
@@ -63,8 +99,9 @@ abstract class BaseCommand extends AbstractMojo
     *
     * @return the target directory the archive is located.
     */
-   public final File targetDirectory() {
-       return targetDir;
+   public final File targetDirectory()
+   {
+      return targetDir;
    }
 
    /**
@@ -73,8 +110,9 @@ abstract class BaseCommand extends AbstractMojo
     *
     * @return the file name of the archive.
     */
-   public final String filename() {
-       return filename;
+   public final String filename()
+   {
+      return filename;
    }
 
    /**
@@ -82,8 +120,9 @@ abstract class BaseCommand extends AbstractMojo
     *
     * @return the archive file.
     */
-   public final File file() {
-       return new File(targetDir, filename);
+   public final File file()
+   {
+      return new File(targetDir, filename);
    }
 
    /**
@@ -100,71 +139,132 @@ abstract class BaseCommand extends AbstractMojo
     * @param deployment The deployment to operate on
     */
    public abstract void perform(Manager manager, Container container, Archive<?> deployment) throws DeploymentException;
-   
+
    /* (non-Javadoc)
     * @see org.apache.maven.plugin.Mojo#execute()
     */
    @Override
    public void execute() throws MojoExecutionException, MojoFailureException
    {
+      validateInput();
+
+      getLog().info(goal() + " file: " + file().getAbsoluteFile());
+
+      ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
+      try
+      {
+         ClassLoader cl = getClassLoader();
+         Thread.currentThread().setContextClassLoader(cl);
+         
+         Class<?> extension = cl.loadClass(LOADABLE_EXTESION_LOADER_CLASS);
+         
+         loadContainer(extension);
+      }
+      catch (Exception e) 
+      {
+         throw new MojoExecutionException("Could not perform goal: " + goal() + " on file " + file(), e);
+      }
+      finally
+      {
+         Thread.currentThread().setContextClassLoader(previousCL);
+      }
+   }
+
+   private void validateInput() 
+   {
+      File deploymentFile = file();
+      if (!deploymentFile.exists())
+      {
+         throw new IllegalArgumentException("Specified file does not exist:" + deploymentFile
+               + ". Verify 'target' and 'filename' configuration.");
+      }
+      
+      if( (classLoadingStrategy == ClassLoadingStrategy.TEST || classLoadingStrategy == ClassLoadingStrategy.COMPILE) && project == null)
+      {
+         throw new IllegalArgumentException("Can not use 'classloading' strategy " + classLoadingStrategy + " outside a project");
+      }
+   }
+
+   private void loadContainer(Class<?>... extensions) throws LifecycleException, DeploymentException  
+   {
       File deploymentFile = file();
       
-      if(!deploymentFile.exists())
-      {
-         throw new IllegalArgumentException("Specified file does not exist:" + deploymentFile + ". Verify 'target' and 'filename' configuration.");
-      }
-      
-      getLog().info(goal() + " file: " + deploymentFile.getAbsoluteFile());
-      
-      Manager manager = ManagerBuilder.from()
-               .extension(LoadableExtensionLoader.class)
-               .create();
-
+      Manager manager = ManagerBuilder.from().extensions(extensions).create();
       manager.start();
-      
-      GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
-                                       .importFrom(deploymentFile)
-                                       .as(GenericArchive.class);
-      
+
       ContainerRegistry registry = manager.resolve(ContainerRegistry.class);
-      
-      if(registry == null)
+
+      if (registry == null)
       {
-         throw new IllegalStateException("No ContainerRegistry found in Context. Something is wrong with the classpath.....");
+         throw new IllegalStateException(
+               "No ContainerRegistry found in Context. Something is wrong with the classpath.....");
       }
-      
-      if(registry.getContainers().size() == 0)
+
+      if (registry.getContainers().size() == 0)
       {
-         throw new IllegalStateException("No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
+         throw new IllegalStateException(
+               "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
       }
-      
+
       // TODO: Add support for multi configuration and arquillian.xml selection
       Container container = registry.getContainer(TargetDescription.DEFAULT);
-      
+
       getLog().info("to container: " + container.getName());
-      
+
       try
       {
          Utils.setup(manager, container);
          Utils.start(manager, container);
-         
+
+         GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
+               .importFrom(deploymentFile).as(GenericArchive.class);
+
          perform(manager, container, deployment);
       }
-      catch (Exception e) 
-      {
-         throw new MojoExecutionException("Could not perform:" + goal(), e);
-      }
-      finally 
+      finally
       {
          try
          {
             Utils.stop(manager, container);
          }
-         catch (Exception e) 
+         catch (Exception e)
          {
             e.printStackTrace();
          }
          manager.shutdown();
+      }
+   }
+
+   protected ClassLoader getClassLoader() throws Exception
+   {
+      synchronized (BaseCommand.class)
+      {
+         List<URL> urls = new ArrayList<URL>();
+         List<String> classPathElements;
+         
+         switch (classLoadingStrategy)
+         {
+            case COMPILE :
+               classPathElements = project.getCompileClasspathElements();
+               break;
+            case TEST :
+               classPathElements = project.getTestClasspathElements();
+               break;
+            case PLUGIN :
+               classPathElements = new ArrayList<String>();
+               break;
+
+            default :
+               classPathElements = new ArrayList<String>();
+               break;
+         }
+
+         for (String object : classPathElements)
+         {
+            String path = (String) object;
+            urls.add(new File(path).toURI().toURL());
+         }
+         return new URLClassLoader(urls.toArray(new URL[]{}), BaseCommand.class.getClassLoader());
       }
    }
 }

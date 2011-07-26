@@ -17,30 +17,40 @@
  */
 package org.jboss.arquillian.maven.test;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 
 /**
- * MySimpleServlet
+ * TestUtils
  *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
  */
-@WebServlet(name = "MySimpleServlet", urlPatterns = { "/*" })
-public class MySimpleServlet extends HttpServlet
+public class Utils
 {
-   public static final String WELCOME_MSG = "Welcome to the Arquillian Maven Plugin!";
+   private Utils() {}
    
-   private static final long serialVersionUID = 1L;
-
-   @Override
-   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+   static String read(URL url) throws Exception
    {
-      resp.getWriter().write(WELCOME_MSG);
+      return read(url.openStream());
+   }
+   
+   static String read(InputStream is) throws Exception 
+   {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      try
+      {
+         int read;
+         while( (read = is.read()) != -1)
+         {
+            out.write(read);
+         }
+      }
+      finally 
+      {
+         try { is.close(); } catch (Exception e) { }
+      }
+      return out.toString();
    }
 }
