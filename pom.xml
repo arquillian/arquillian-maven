@@ -10,7 +10,7 @@
 
     <groupId>org.jboss.arquillian.maven</groupId>
     <artifactId>arquillian-maven-plugin-parent</artifactId>
-    <version>1.0.0.Alpha1</version>
+    <version>1.0.0.Alpha2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Arquillian Maven Plugin Parent</name>
     <description>Maven plugin for Deploy/UnDeploy/Run based on the Arquillian Containers</description>
