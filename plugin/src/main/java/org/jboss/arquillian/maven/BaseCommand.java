@@ -49,6 +49,8 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
  */
 abstract class BaseCommand extends AbstractMojo
 {
+   private static final String ARQUILLIAN_XML_SYS_PROP = "arquillian.xml";
+
    private static final String LOADABLE_EXTESION_LOADER_CLASS = "org.jboss.arquillian.core.impl.loadable.LoadableExtensionLoader";
    
    public enum ClassLoadingStrategy 
@@ -95,6 +97,14 @@ abstract class BaseCommand extends AbstractMojo
    private String filename;
 
    /**
+    * Location of the arquillian configuration file. It can be set either as location on the file system (Ex: ${basedir}/test/arquillian4test.xml)
+    * or as a resource in the classpath (Ex: /arquillian4test.xml).
+    *
+    * @parameter expression="${arquillian.xml}"
+    */
+   private String arquillianXml;
+
+   /**
     * The target directory the archive is located. The default is {@code project.build.directory}.
     *
     * @return the target directory the archive is located.
@@ -126,6 +136,14 @@ abstract class BaseCommand extends AbstractMojo
    }
 
    /**
+    * Return the value of the arquillianXml configuration property.
+    */
+   public final String arquillianXml()
+   {
+      return arquillianXml;
+   }
+
+   /**
     * The goal of the deployment.
     *
     * @return the goal of the deployment.
@@ -147,7 +165,9 @@ abstract class BaseCommand extends AbstractMojo
    public void execute() throws MojoExecutionException, MojoFailureException
    {
       validateInput();
+      initArquillianXml();
 
+      getLog().info("Using configuration: " + System.getProperty(ARQUILLIAN_XML_SYS_PROP));
       getLog().info(goal() + " file: " + file().getAbsoluteFile());
 
       ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
@@ -167,6 +187,13 @@ abstract class BaseCommand extends AbstractMojo
       finally
       {
          Thread.currentThread().setContextClassLoader(previousCL);
+      }
+   }
+
+   void initArquillianXml()
+   {
+      if (arquillianXml() != null) {
+         System.setProperty(ARQUILLIAN_XML_SYS_PROP, arquillianXml());
       }
    }
 
@@ -206,7 +233,7 @@ abstract class BaseCommand extends AbstractMojo
                "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
       }
 
-      // TODO: Add support for multi configuration and arquillian.xml selection
+      // TODO: Add support for multi configuration
       Container container = registry.getContainer(TargetDescription.DEFAULT);
 
       getLog().info("to container: " + container.getName());
