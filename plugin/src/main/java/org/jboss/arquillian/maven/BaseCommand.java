@@ -49,6 +49,8 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
  */
 abstract class BaseCommand extends AbstractMojo
 {
+   private static final String ARQUILLIAN_XML_SYS_PROP = "arquillian.xml";
+
    private static final String LOADABLE_EXTESION_LOADER_CLASS = "org.jboss.arquillian.core.impl.loadable.LoadableExtensionLoader";
    
    public enum ClassLoadingStrategy 
@@ -95,6 +97,14 @@ abstract class BaseCommand extends AbstractMojo
    private String filename;
 
    /**
+    * Location of the arquillian configuration file. It can be set either as location on the file system (Ex: ${basedir}/test/arquillian4test.xml)
+    * or as a resource in the classpath (Ex: /arquillian4test.xml).
+    *
+    * @parameter expression="${arquillian.xml}"
+    */
+   private String arquillianXml;
+
+   /**
     * The target directory the archive is located. The default is {@code project.build.directory}.
     *
     * @return the target directory the archive is located.
@@ -126,6 +136,14 @@ abstract class BaseCommand extends AbstractMojo
    }
 
    /**
+    * Return the value of the arquillianXml configuration property.
+    */
+   public final String arquillianXml()
+   {
+      return arquillianXml;
+   }
+
+   /**
     * The goal of the deployment.
     *
     * @return the goal of the deployment.
@@ -147,7 +165,9 @@ abstract class BaseCommand extends AbstractMojo
    public void execute() throws MojoExecutionException, MojoFailureException
    {
       validateInput();
+      initArquillianXml();
 
+      getLog().info("Using configuration: " + System.getProperty(ARQUILLIAN_XML_SYS_PROP));
       getLog().info(goal() + " file: " + file().getAbsoluteFile());
 
       ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
@@ -170,6 +190,13 @@ abstract class BaseCommand extends AbstractMojo
       }
    }
 
+   void initArquillianXml()
+   {
+      if (arquillianXml() != null) {
+         System.setProperty(ARQUILLIAN_XML_SYS_PROP, arquillianXml());
+      }
+   }
+
    private void validateInput() 
    {
       File deploymentFile = file();
@@ -187,11 +214,61 @@ abstract class BaseCommand extends AbstractMojo
 
    private void loadContainer(Class<?>... extensions) throws LifecycleException, DeploymentException  
    {
-      File deploymentFile = file();
-      
       Manager manager = ManagerBuilder.from().extensions(extensions).create();
       manager.start();
 
+      try
+      {
+         startContainers(manager);
+      }
+      finally
+      {
+         manager.shutdown();
+      }
+   }
+
+   private void startContainers(Manager manager) throws LifecycleException, DeploymentException
+   {
+      // TODO: Add support for multi configuration
+      Container container = createRegistry(manager).getContainer(TargetDescription.DEFAULT);
+      getLog().info("to container: " + container.getName());
+
+      try
+      {
+         startContainer(manager, container);
+      }
+      finally
+      {
+         stopContainer(manager, container);
+      }
+   }
+
+   private void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
+   {
+      Utils.setup(manager, container);
+      Utils.start(manager, container);
+
+      File deploymentFile = file();
+      GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
+            .importFrom(deploymentFile).as(GenericArchive.class);
+
+      perform(manager, container, deployment);
+   }
+
+   private void stopContainer(Manager manager, Container container)
+   {
+      try
+      {
+         Utils.stop(manager, container);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private ContainerRegistry createRegistry(Manager manager)
+   {
       ContainerRegistry registry = manager.resolve(ContainerRegistry.class);
 
       if (registry == null)
@@ -205,34 +282,7 @@ abstract class BaseCommand extends AbstractMojo
          throw new IllegalStateException(
                "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
       }
-
-      // TODO: Add support for multi configuration and arquillian.xml selection
-      Container container = registry.getContainer(TargetDescription.DEFAULT);
-
-      getLog().info("to container: " + container.getName());
-
-      try
-      {
-         Utils.setup(manager, container);
-         Utils.start(manager, container);
-
-         GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
-               .importFrom(deploymentFile).as(GenericArchive.class);
-
-         perform(manager, container, deployment);
-      }
-      finally
-      {
-         try
-         {
-            Utils.stop(manager, container);
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
-         manager.shutdown();
-      }
+      return registry;
    }
 
    protected ClassLoader getClassLoader() throws Exception
