@@ -214,11 +214,61 @@ abstract class BaseCommand extends AbstractMojo
 
    private void loadContainer(Class<?>... extensions) throws LifecycleException, DeploymentException  
    {
-      File deploymentFile = file();
-      
       Manager manager = ManagerBuilder.from().extensions(extensions).create();
       manager.start();
 
+      try
+      {
+         startContainers(manager);
+      }
+      finally
+      {
+         manager.shutdown();
+      }
+   }
+
+   private void startContainers(Manager manager) throws LifecycleException, DeploymentException
+   {
+      // TODO: Add support for multi configuration
+      Container container = createRegistry(manager).getContainer(TargetDescription.DEFAULT);
+      getLog().info("to container: " + container.getName());
+
+      try
+      {
+         startContainer(manager, container);
+      }
+      finally
+      {
+         stopContainer(manager, container);
+      }
+   }
+
+   private void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
+   {
+      Utils.setup(manager, container);
+      Utils.start(manager, container);
+
+      File deploymentFile = file();
+      GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
+            .importFrom(deploymentFile).as(GenericArchive.class);
+
+      perform(manager, container, deployment);
+   }
+
+   private void stopContainer(Manager manager, Container container)
+   {
+      try
+      {
+         Utils.stop(manager, container);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private ContainerRegistry createRegistry(Manager manager)
+   {
       ContainerRegistry registry = manager.resolve(ContainerRegistry.class);
 
       if (registry == null)
@@ -232,34 +282,7 @@ abstract class BaseCommand extends AbstractMojo
          throw new IllegalStateException(
                "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
       }
-
-      // TODO: Add support for multi configuration
-      Container container = registry.getContainer(TargetDescription.DEFAULT);
-
-      getLog().info("to container: " + container.getName());
-
-      try
-      {
-         Utils.setup(manager, container);
-         Utils.start(manager, container);
-
-         GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
-               .importFrom(deploymentFile).as(GenericArchive.class);
-
-         perform(manager, container, deployment);
-      }
-      finally
-      {
-         try
-         {
-            Utils.stop(manager, container);
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
-         manager.shutdown();
-      }
+      return registry;
    }
 
    protected ClassLoader getClassLoader() throws Exception
