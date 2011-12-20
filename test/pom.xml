@@ -51,6 +51,8 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <!-- for some reason the WAR plugin is packaging test scoped resources-->
+                    <packagingExcludes>WEB-INF/lib/shrinkwrap*</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>
