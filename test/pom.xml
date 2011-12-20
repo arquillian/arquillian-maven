@@ -16,6 +16,7 @@
 
     <properties>
         <version.arquillian_jetty>1.0.0.CR1</version.arquillian_jetty>
+        <version.arquillian_jbossas7>7.0.2.Final</version.arquillian_jbossas7>
         <version.shrinkwrap_descriptors>1.1.0-alpha-2</version.shrinkwrap_descriptors>
         <version.jetty>8.0.0.M3</version.jetty>
     </properties>
@@ -82,6 +83,17 @@
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-plus</artifactId>
                     <version>${version.jetty}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>jbossas-7</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.as</groupId>
+                    <artifactId>jboss-as-arquillian-container-remote</artifactId>
+                    <version>${version.arquillian_jbossas7}</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
