@@ -214,18 +214,34 @@ abstract class BaseCommand extends AbstractMojo
 
    private void loadContainer(Class<?>... extensions) throws LifecycleException, DeploymentException  
    {
-      Manager manager = ManagerBuilder.from().extensions(extensions).create();
-      manager.start();
-
+      Manager manager = startManager(extensions);
       try
       {
          startContainers(manager);
       }
       finally
       {
-         manager.shutdown();
+         shutDownManager(manager);
       }
    }
+
+   void shutDownManager(Manager manager)
+   {
+      manager.shutdown();
+   }
+
+   Manager startManager(Class<?>... extensions)
+   {
+      Manager manager = getFromContext(Manager.class);
+      if (manager != null)
+         return manager;
+
+      manager = ManagerBuilder.from().extensions(extensions).create();
+      putInContext(Manager.class, manager);
+      manager.start();
+      return manager;
+   }
+
 
    private void startContainers(Manager manager) throws LifecycleException, DeploymentException
    {
@@ -236,6 +252,7 @@ abstract class BaseCommand extends AbstractMojo
       try
       {
          startContainer(manager, container);
+         perform(manager, container, createDeployment());
       }
       finally
       {
@@ -243,19 +260,23 @@ abstract class BaseCommand extends AbstractMojo
       }
    }
 
-   private void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
+   void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
    {
       Utils.setup(manager, container);
       Utils.start(manager, container);
-
-      File deploymentFile = file();
-      GenericArchive deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
-            .importFrom(deploymentFile).as(GenericArchive.class);
-
-      perform(manager, container, deployment);
    }
 
-   private void stopContainer(Manager manager, Container container)
+   Archive<?> createDeployment()
+   {
+      getLog().info(goal() + " file: " + file().getAbsoluteFile());
+
+      File deploymentFile = file();
+      Archive<?> deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
+            .importFrom(deploymentFile).as(GenericArchive.class);
+      return deployment;
+   }
+
+   void stopContainer(Manager manager, Container container)
    {
       try
       {
@@ -269,8 +290,18 @@ abstract class BaseCommand extends AbstractMojo
 
    private ContainerRegistry createRegistry(Manager manager)
    {
-      ContainerRegistry registry = manager.resolve(ContainerRegistry.class);
+      ContainerRegistry registry = getFromContext(ContainerRegistry.class);
+      if (registry != null)
+         return registry;
 
+      registry = manager.resolve(ContainerRegistry.class);
+      validateRegistry(registry);
+      putInContext(ContainerRegistry.class, registry);
+      return registry;
+   }
+
+   private void validateRegistry(ContainerRegistry registry)
+   {
       if (registry == null)
       {
          throw new IllegalStateException(
@@ -282,11 +313,14 @@ abstract class BaseCommand extends AbstractMojo
          throw new IllegalStateException(
                "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
       }
-      return registry;
    }
 
    protected ClassLoader getClassLoader() throws Exception
    {
+      ClassLoader classLoader = getFromContext(ClassLoader.class);
+      if (classLoader != null)
+         return classLoader;
+
       synchronized (BaseCommand.class)
       {
          List<URL> urls = new ArrayList<URL>();
@@ -314,7 +348,19 @@ abstract class BaseCommand extends AbstractMojo
             String path = (String) object;
             urls.add(new File(path).toURI().toURL());
          }
-         return new URLClassLoader(urls.toArray(new URL[]{}), BaseCommand.class.getClassLoader());
+         URLClassLoader urlClassLoader = new URLClassLoader(urls.toArray(new URL[]{}), BaseCommand.class.getClassLoader());
+         putInContext(ClassLoader.class, urlClassLoader);
+         return urlClassLoader;
       }
+   }
+
+   @SuppressWarnings("unchecked")
+   <T> T getFromContext(Class<T> key) {
+      return (T) getPluginContext().get(key);
+   }
+
+   @SuppressWarnings("unchecked")
+   <T> T putInContext(Class<T> key, T value) {
+      return (T) getPluginContext().put(key, value);
    }
 }

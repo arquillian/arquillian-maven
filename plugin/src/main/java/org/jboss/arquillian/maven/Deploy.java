@@ -51,4 +51,22 @@ public final class Deploy extends BaseCommand
       getLog().info("Perform deploy on " + container.getName() + " of deployment " + deployment.getName());
       Utils.deploy(manager, container, deployment);
    }
+
+   /* (non-Javadoc)
+    * @see org.jboss.arquillian.maven.BaseCommand#stopContainer(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container)
+    */
+   @Override
+   void stopContainer(Manager manager, Container container)
+   {
+      // Don't stop the container
+   }
+   
+   /* (non-Javadoc)
+    * @see org.jboss.arquillian.maven.BaseCommand#shutDownManager(org.jboss.arquillian.core.spi.Manager)
+    */
+   @Override
+   void shutDownManager(Manager manager)
+   {
+      // Don't shutdown the manager
+   }
 }

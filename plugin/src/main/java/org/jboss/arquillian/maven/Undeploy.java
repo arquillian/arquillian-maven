@@ -19,6 +19,7 @@ package org.jboss.arquillian.maven;
 
 import org.jboss.arquillian.container.spi.Container;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
+import org.jboss.arquillian.container.spi.client.container.LifecycleException;
 import org.jboss.arquillian.core.spi.Manager;
 import org.jboss.shrinkwrap.api.Archive;
 
@@ -40,6 +41,15 @@ public final class Undeploy extends BaseCommand
    public String goal()
    {
       return "undeploy";
+   }
+
+   /* (non-Javadoc)
+    * @see org.jboss.arquillian.maven.BaseCommand#startContainer(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container)
+    */
+   @Override
+   void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
+   {
+      // The container should be already started
    }
 
    /* (non-Javadoc)
