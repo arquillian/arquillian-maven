@@ -1,7 +1,7 @@
 Arquillian Maven Plugin
 =======================
 
-A Maven plugin with support for deploy/undeploy and run operations using the Arquillian Containers.
+A Maven plugin with support for start/deploy/undeploy/stop and run operations using the Arquillian Containers.
 
 
 Operations
@@ -16,17 +16,33 @@ Operations
 
     (note: Remote containers are not actually started, but Archive will be undeployed on shutdown) 
 
+* start
+
+    This goal will Setup and Start the Container. The Container is added to the Maven execution context for reuse by other command. 
+
 * deploy
 
-    This goal will Setup and Start the Container and Deploy the Archive, for so to Stop the Container.
-
-    (note: This goal makes most sense used with Remote containers)
+    This goal will deploy the given Archive defined by "filename". An Exception is thrown if start has not been called.
 
 * undeploy
 
+    This goal will undeploy the given Archive defined by "filename". An Exception is thrown if start has not been called.
+
+* stop
+
+    This goal stops the Container and cleans up the Maven context.
+
+* deployRemote
+
     This goal will Setup and Start the Container and Deploy the Archive, for so to Stop the Container.
 
-    (note: This goal makes most sense used with Remote containers)
+    (note: This goal only makes sense used with Remote containers)
+
+* undeployRemote
+
+    This goal will Setup and Start the Container and Deploy the Archive, for so to Stop the Container.
+
+    (note: This goal only makes sense used with Remote containers)
 
 
 Configuration
@@ -119,4 +135,3 @@ mvn arquillian:run -Pjetty
 The dependencies needed are the same as described in the [Reference Guide -> Complete Container Reference](https://docs.jboss.org/author/display/ARQ/Complete+Container+Reference).
 
 See the test/ sub module for a complete setup using both Arquillian for testing the module and the Maven module for manual verification. 
-
