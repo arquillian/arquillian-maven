@@ -47,8 +47,9 @@ public final class Run extends BaseCommand
     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
     */
    @Override
-   public void perform(final Manager manager, final Container container, final Archive<?> deployment) throws DeploymentException
+   public void perform(final Manager manager, final Container container) throws DeploymentException
    {
+      final Archive<?> deployment = createDeployment();
       getLog().info("Perform run on " + container.getName() + " of deployment " + deployment.getName());
 
       Utils.deploy(manager, container, deployment);

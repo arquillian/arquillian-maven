@@ -56,8 +56,9 @@ public final class Undeploy extends BaseCommand
     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
     */
    @Override
-   public void perform(Manager manager, Container container, Archive<?> deployment) throws DeploymentException
+   public void perform(Manager manager, Container container) throws DeploymentException
    {
+      final Archive<?> deployment = createDeployment();
       getLog().info("Perform undeploy on " + container.getName() + " of deployment " + deployment.getName());
       Utils.undeploy(manager, container, deployment);
    }

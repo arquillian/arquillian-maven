@@ -154,9 +154,8 @@ abstract class BaseCommand extends AbstractMojo
     * Perform the defined goal, e.g. deploy / run / undeploy
     * 
     * @param container The chosen container to operate on
-    * @param deployment The deployment to operate on
     */
-   public abstract void perform(Manager manager, Container container, Archive<?> deployment) throws DeploymentException;
+   public abstract void perform(Manager manager, Container container) throws DeploymentException;
 
    /* (non-Javadoc)
     * @see org.apache.maven.plugin.Mojo#execute()
@@ -245,19 +244,24 @@ abstract class BaseCommand extends AbstractMojo
 
    private void startContainers(Manager manager) throws LifecycleException, DeploymentException
    {
-      // TODO: Add support for multi configuration
-      Container container = createRegistry(manager).getContainer(TargetDescription.DEFAULT);
-      getLog().info("to container: " + container.getName());
-
+      Container container = selectContainer(manager);
       try
       {
          startContainer(manager, container);
-         perform(manager, container, createDeployment());
+         perform(manager, container);
       }
       finally
       {
          stopContainer(manager, container);
       }
+   }
+
+   private Container selectContainer(Manager manager)
+   {
+      // TODO: Add support for multi configuration
+      Container container = createRegistry(manager).getContainer(TargetDescription.DEFAULT);
+      getLog().info("to container: " + container.getName());
+      return container;
    }
 
    void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
