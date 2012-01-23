@@ -15,38 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.arquillian.maven.test;
-
-import static org.jboss.arquillian.maven.test.Utils.read;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
-
-import junit.framework.Assert;
-
-import org.junit.Test;
+package org.jboss.arquillian.maven;
 
 /**
- * MySimpleServletITCase
- *
  * @author Davide D'Alto
- * @version $Revision: $
  */
-public class MySimpleServletITCase
+public final class StartTestCase extends BaseCommandTestBase
 {
-   @Test
-   public void shouldBeAbleToCallServlet() throws Exception 
+
+   @Override
+   public String goal()
    {
-      String url = "http://127.0.0.1:" + servletPort() + "/arquillian-maven/hello";
-      String result = read(new URL(url));
-      Assert.assertEquals(MySimpleServlet.WELCOME_MSG, result);
+      return "start";
    }
 
-   private String servletPort() throws IOException
-   {
-      Properties properties = new Properties();
-      properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("test.properties"));
-      return properties.getProperty("servlet.port");
-   }
 }

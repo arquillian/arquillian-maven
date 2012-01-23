@@ -19,6 +19,7 @@ package org.jboss.arquillian.maven;
 
 import org.jboss.arquillian.container.spi.Container;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
+import org.jboss.arquillian.container.spi.client.container.LifecycleException;
 import org.jboss.arquillian.core.spi.Manager;
 import org.jboss.shrinkwrap.api.Archive;
 
@@ -42,32 +43,25 @@ public final class Deploy extends BaseCommand
       return "deploy";
    }
 
+   @Override
+   Manager startNewManager(Class<?>... extensions)
+   {
+      throw new RuntimeException("Container not started. The container must be started before deploy. If the container is remote sue \"arquillian:deployRemote\""); 
+   }
+
    /* (non-Javadoc)
     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
     */
    @Override
-   public void perform(Manager manager, Container container) throws DeploymentException
+   public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException
    {
       Archive<?> deployment = createDeployment();
       getLog().info("Perform deploy on " + container.getName() + " of deployment " + deployment.getName());
-      Utils.deploy(manager, container, deployment);
+      execute(manager, container, deployment);
    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#stopContainer(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container)
-    */
-   @Override
-   void stopContainer(Manager manager, Container container)
+   static void execute(Manager manager, Container container, Archive<?> deployment) throws DeploymentException
    {
-      // Don't stop the container
-   }
-   
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#shutDownManager(org.jboss.arquillian.core.spi.Manager)
-    */
-   @Override
-   void shutDownManager(Manager manager)
-   {
-      // Don't shutdown the manager
+      Utils.deploy(manager, container, deployment);
    }
 }

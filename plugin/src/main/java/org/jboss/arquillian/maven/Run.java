@@ -19,6 +19,7 @@ package org.jboss.arquillian.maven;
 
 import org.jboss.arquillian.container.spi.Container;
 import org.jboss.arquillian.container.spi.client.container.DeploymentException;
+import org.jboss.arquillian.container.spi.client.container.LifecycleException;
 import org.jboss.arquillian.core.spi.Manager;
 import org.jboss.arquillian.core.spi.context.ApplicationContext;
 import org.jboss.shrinkwrap.api.Archive;
@@ -47,12 +48,11 @@ public final class Run extends BaseCommand
     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
     */
    @Override
-   public void perform(final Manager manager, final Container container) throws DeploymentException
+   public void perform(final Manager manager, final Container container) throws LifecycleException, DeploymentException
    {
-      final Archive<?> deployment = createDeployment();
-      getLog().info("Perform run on " + container.getName() + " of deployment " + deployment.getName());
+      Start.execute(manager, container);
 
-      Utils.deploy(manager, container, deployment);
+      final Archive<?> deployment = deploy(manager, container);
 
       Runtime.getRuntime().addShutdownHook(new Thread() 
       {
@@ -63,8 +63,8 @@ public final class Run extends BaseCommand
             manager.getContext(ApplicationContext.class).activate();
             try
             {
-               Utils.undeploy(manager, container, deployment);
-               Utils.stop(manager, container);
+               Undeploy.execute(manager, container, deployment);
+               Stop.execute(manager, container);
             }
             catch (Exception e) 
             {
@@ -83,5 +83,14 @@ public final class Run extends BaseCommand
       {
          throw new RuntimeException(e); 
       }
+   }
+
+   private Archive<?> deploy(final Manager manager, final Container container) throws DeploymentException
+   {
+      final Archive<?> deployment = createDeployment();
+      getLog().info("Perform run on " + container.getName() + " of deployment " + deployment.getName());
+
+      Deploy.execute(manager, container, deployment);
+      return deployment;
    }
 }

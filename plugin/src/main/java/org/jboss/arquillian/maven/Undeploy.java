@@ -27,10 +27,10 @@ import org.jboss.shrinkwrap.api.Archive;
  * UnDeploy to a Container
  *
  * @goal undeploy
- * 
+ *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
- * 
+ *
  */
 public final class Undeploy extends BaseCommand
 {
@@ -43,23 +43,24 @@ public final class Undeploy extends BaseCommand
       return "undeploy";
    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#startContainer(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container)
-    */
-   @Override
-   void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
+   Manager startNewManager(Class<?>... extensions)
    {
-      // The container should be already started
-   }
+      throw new RuntimeException("Container not started. The container must be started before undeploy. If the container is remote sue \"arquillian:undeployRemote\"");
+   };
 
    /* (non-Javadoc)
     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
     */
    @Override
-   public void perform(Manager manager, Container container) throws DeploymentException
+   public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException
    {
       final Archive<?> deployment = createDeployment();
       getLog().info("Perform undeploy on " + container.getName() + " of deployment " + deployment.getName());
+      execute(manager, container, deployment);
+   }
+
+   static void execute(Manager manager, Container container, final Archive<?> deployment) throws DeploymentException
+   {
       Utils.undeploy(manager, container, deployment);
    }
 }

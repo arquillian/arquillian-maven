@@ -43,6 +43,7 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
  * BaseCommand
  * 
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
+ * @author Davide D'Alto
  * @version $Revision: $
  * 
  * @requiresDependencyResolution test
@@ -154,8 +155,10 @@ abstract class BaseCommand extends AbstractMojo
     * Perform the defined goal, e.g. deploy / run / undeploy
     * 
     * @param container The chosen container to operate on
+    * @throws LifecycleException
+    * @throws DeploymentException
     */
-   public abstract void perform(Manager manager, Container container) throws DeploymentException;
+   public abstract void perform(Manager manager, Container container) throws DeploymentException, LifecycleException;
 
    /* (non-Javadoc)
     * @see org.apache.maven.plugin.Mojo#execute()
@@ -196,7 +199,7 @@ abstract class BaseCommand extends AbstractMojo
       }
    }
 
-   private void validateInput() 
+   void validateInput()
    {
       File deploymentFile = file();
       if (!deploymentFile.exists())
@@ -211,49 +214,41 @@ abstract class BaseCommand extends AbstractMojo
       }
    }
 
-   private void loadContainer(Class<?>... extensions) throws LifecycleException, DeploymentException  
+   private void loadContainer(Class<?>... extensions) throws Exception
    {
       Manager manager = startManager(extensions);
       try
       {
-         startContainers(manager);
+         perform(manager, selectContainer(manager));
       }
-      finally
+      catch (Exception e)
       {
-         shutDownManager(manager);
+         manager.shutdown();
+         throw e;
       }
    }
 
-   void shutDownManager(Manager manager)
-   {
-      manager.shutdown();
-   }
-
-   Manager startManager(Class<?>... extensions)
+   private Manager startManager(Class<?>... extensions)
    {
       Manager manager = getFromContext(Manager.class);
-      if (manager != null)
+      if (isStarted(manager))
          return manager;
 
-      manager = ManagerBuilder.from().extensions(extensions).create();
+      manager = startNewManager(extensions);
       putInContext(Manager.class, manager);
-      manager.start();
       return manager;
    }
 
-
-   private void startContainers(Manager manager) throws LifecycleException, DeploymentException
+   private boolean isStarted(Manager manager)
    {
-      Container container = selectContainer(manager);
-      try
-      {
-         startContainer(manager, container);
-         perform(manager, container);
-      }
-      finally
-      {
-         stopContainer(manager, container);
-      }
+      return manager != null;
+   }
+
+   Manager startNewManager(Class<?>... extensions)
+   {
+      Manager manager = ManagerBuilder.from().extensions(extensions).create();
+      manager.start();
+      return manager;
    }
 
    private Container selectContainer(Manager manager)
@@ -264,12 +259,6 @@ abstract class BaseCommand extends AbstractMojo
       return container;
    }
 
-   void startContainer(Manager manager, Container container) throws LifecycleException, DeploymentException
-   {
-      Utils.setup(manager, container);
-      Utils.start(manager, container);
-   }
-
    Archive<?> createDeployment()
    {
       getLog().info(goal() + " file: " + file().getAbsoluteFile());
@@ -278,18 +267,6 @@ abstract class BaseCommand extends AbstractMojo
       Archive<?> deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
             .importFrom(deploymentFile).as(GenericArchive.class);
       return deployment;
-   }
-
-   void stopContainer(Manager manager, Container container)
-   {
-      try
-      {
-         Utils.stop(manager, container);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
    }
 
    private ContainerRegistry createRegistry(Manager manager)
