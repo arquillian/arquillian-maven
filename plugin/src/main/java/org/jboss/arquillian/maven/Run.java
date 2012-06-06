@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -28,69 +28,62 @@ import org.jboss.shrinkwrap.api.Archive;
  * Deploy to a Container
  *
  * @goal run
- * 
+ *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
- * 
+ *
  */
-public final class Run extends BaseCommand
-{
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "run";
-   }
+public final class Run extends BaseCommand {
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
-    */
-   @Override
-   public void perform(final Manager manager, final Container container) throws LifecycleException, DeploymentException
-   {
-      Start.execute(manager, container);
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "run";
+    }
 
-      final Archive<?> deployment = deploy(manager, container);
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
+     */
+    @Override
+    public void perform(final Manager manager, final Container container) throws LifecycleException, DeploymentException {
+        Start.execute(manager, container);
 
-      Runtime.getRuntime().addShutdownHook(new Thread() 
-      {
-         @Override
-         public void run()
-         {
-            // ThreadLocals are not auto transfered / reactivated on new Threads, activate the ApplicationContext
-            manager.getContext(ApplicationContext.class).activate();
-            try
-            {
-               Undeploy.execute(manager, container, deployment);
-               Stop.execute(manager, container);
+        final Archive<?> deployment = deploy(manager, container);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                // ThreadLocals are not auto transfered / reactivated on new Threads, activate the ApplicationContext
+                manager.getContext(ApplicationContext.class).activate();
+                try {
+                    Undeploy.execute(manager, container, deployment);
+                    Stop.execute(manager, container);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            catch (Exception e) 
-            {
-               e.printStackTrace();
+        });
+        try {
+            while (true) {
+                Thread.sleep(10000);
             }
-         }
-      });
-      try
-      {
-         while(true)
-         {
-            Thread.sleep(10000);
-         }
-      }
-      catch (InterruptedException e) 
-      {
-         throw new RuntimeException(e); 
-      }
-   }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-   private Archive<?> deploy(final Manager manager, final Container container) throws DeploymentException
-   {
-      final Archive<?> deployment = createDeployment();
-      getLog().info("Perform run on " + container.getName() + " of deployment " + deployment.getName());
+    private Archive<?> deploy(final Manager manager, final Container container) throws DeploymentException {
+        final Archive<?> deployment = createDeployment();
+        getLog().info("Perform run on " + container.getName() + " of deployment " + deployment.getName());
 
-      Deploy.execute(manager, container, deployment);
-      return deployment;
-   }
+        Deploy.execute(manager, container, deployment);
+        return deployment;
+    }
 }

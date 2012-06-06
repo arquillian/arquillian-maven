@@ -24,46 +24,40 @@ import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 /**
  * @author Davide D'Alto
  */
-abstract class BaseCommandTestBase extends AbstractMojoTestCase
-{
+abstract class BaseCommandTestBase extends AbstractMojoTestCase {
 
-   private static final String ARQUILLIAN_XML_SYS_PROP = "arquillian.xml";
+    private static final String ARQUILLIAN_XML_SYS_PROP = "arquillian.xml";
 
-   public void testArquillianXmlIsNullWhenNotSet() throws Exception
-   {
-      BaseCommand baseCommand = (BaseCommand) lookupMojo(goal(), pomFile("empty-configuration-pom.xml"));
-      assertNull(baseCommand.arquillianXml());
-   }
+    public void testArquillianXmlIsNullWhenNotSet() throws Exception {
+        BaseCommand baseCommand = (BaseCommand) lookupMojo(goal(), pomFile("empty-configuration-pom.xml"));
+        assertNull(baseCommand.arquillianXml());
+    }
 
-   public void testArquillianXmlWhenIsSet() throws Exception
-   {
-      String savedValue = System.getProperty(ARQUILLIAN_XML_SYS_PROP);
+    public void testArquillianXmlWhenIsSet() throws Exception {
+        String savedValue = System.getProperty(ARQUILLIAN_XML_SYS_PROP);
 
-      BaseCommand baseCommand = (BaseCommand) lookupMojo(goal(), pomFile("arquillianXml4test-pom.xml"));
-      assertNotNull(baseCommand.arquillianXml());
-      assertEquals("Unexpected value for arquillian.xml system property",
-            "arquillianXml4test.xml",
-            System.getProperty(ARQUILLIAN_XML_SYS_PROP));
+        BaseCommand baseCommand = (BaseCommand) lookupMojo(goal(), pomFile("arquillianXml4test-pom.xml"));
+        assertNotNull(baseCommand.arquillianXml());
+        assertEquals("Unexpected value for arquillian.xml system property", "arquillianXml4test.xml",
+                System.getProperty(ARQUILLIAN_XML_SYS_PROP));
 
-      System.setProperty(ARQUILLIAN_XML_SYS_PROP, savedValue);
-   }
+        System.setProperty(ARQUILLIAN_XML_SYS_PROP, savedValue);
+    }
 
-   public void testArquillianXmlInitialization() throws Exception
-   {
-      BaseCommand baseCommand = (BaseCommand) lookupMojo(goal(), pomFile("arquillianXml4test-pom.xml"));
-      baseCommand.initArquillianXml();
+    public void testArquillianXmlInitialization() throws Exception {
+        BaseCommand baseCommand = (BaseCommand) lookupMojo(goal(), pomFile("arquillianXml4test-pom.xml"));
+        baseCommand.initArquillianXml();
 
-      assertEquals("Unexpected value for arquillianXml property", "arquillianXml4test.xml", baseCommand.arquillianXml());
-   }
+        assertEquals("Unexpected value for arquillianXml property", "arquillianXml4test.xml", baseCommand.arquillianXml());
+    }
 
-   private File pomFile(String pomFileName)
-   {
-      File pom = getTestFile("src/test/resources/" + pomFileName);
-      assertNotNull(pom);
-      assertTrue(pom.exists());
-      return pom;
-   }
+    private File pomFile(String pomFileName) {
+        File pom = getTestFile("src/test/resources/" + pomFileName);
+        assertNotNull(pom);
+        assertTrue(pom.exists());
+        return pom;
+    }
 
-   abstract String goal();
+    abstract String goal();
 
 }

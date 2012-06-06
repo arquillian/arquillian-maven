@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -27,30 +27,28 @@ import java.net.URL;
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
  */
-public class Utils
-{
-   private Utils() {}
-   
-   static String read(URL url) throws Exception
-   {
-      return read(url.openStream());
-   }
-   
-   static String read(InputStream is) throws Exception 
-   {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      try
-      {
-         int read;
-         while( (read = is.read()) != -1)
-         {
-            out.write(read);
-         }
-      }
-      finally 
-      {
-         try { is.close(); } catch (Exception e) { }
-      }
-      return out.toString();
-   }
+public class Utils {
+
+    private Utils() {
+    }
+
+    static String read(URL url) throws Exception {
+        return read(url.openStream());
+    }
+
+    static String read(InputStream is) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            int read;
+            while ((read = is.read()) != -1) {
+                out.write(read);
+            }
+        } finally {
+            try {
+                is.close();
+            } catch (Exception e) {
+            }
+        }
+        return out.toString();
+    }
 }

@@ -32,44 +32,44 @@ import org.jboss.shrinkwrap.api.Archive;
  * @version $Revision: $
  *
  */
-public final class DeployRemote extends BaseCommand
-{
-   private boolean managerStartedByMe = false;
+public final class DeployRemote extends BaseCommand {
+    private boolean managerStartedByMe = false;
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "deployRemote";
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "deployRemote";
+    }
 
-   @Override
-   Manager startNewManager(Class<?>... extensions)
-   {
-      managerStartedByMe = true;
-      return super.startNewManager(extensions);
-   }
+    @Override
+    Manager startNewManager(Class<?>... extensions) {
+        managerStartedByMe = true;
+        return super.startNewManager(extensions);
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
-    */
-   @Override
-   public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException
-   {
-      if (managerStartedByMe)
-         Start.execute(manager, container);
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
+     */
+    @Override
+    public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException {
+        if (managerStartedByMe)
+            Start.execute(manager, container);
 
-      deploy(manager, container);
+        deploy(manager, container);
 
-      Stop.execute( manager, container );
-   }
+        Stop.execute(manager, container);
+    }
 
-   private void deploy(Manager manager, Container container) throws DeploymentException
-   {
-      Archive<?> deployment = createDeployment();
-      getLog().info("Perform deploy on " + container.getName() + " of deployment " + deployment.getName());
-      Deploy.execute( manager, container, deployment );
-   }
+    private void deploy(Manager manager, Container container) throws DeploymentException {
+        Archive<?> deployment = createDeployment();
+        getLog().info("Perform deploy on " + container.getName() + " of deployment " + deployment.getName());
+        Deploy.execute(manager, container, deployment);
+    }
 }

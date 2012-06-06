@@ -30,39 +30,41 @@ import org.jboss.arquillian.core.spi.Manager;
  * @version $Revision: $
  *
  */
-public final class Start extends BaseCommand
-{
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "start";
-   }
+public final class Start extends BaseCommand {
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "start";
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#validateInput()
-    */
-   @Override
-   void validateInput()
-   {
-      // No need to validate when starting
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#validateInput()
+     */
+    @Override
+    void validateInput() {
+        // No need to validate when starting
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container)
-    */
-   @Override
-   public void perform(Manager manager, Container container) throws LifecycleException
-   {
-      execute(manager, container);
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container)
+     */
+    @Override
+    public void perform(Manager manager, Container container) throws LifecycleException {
+        execute(manager, container);
+    }
 
-   static void execute(Manager manager, Container container) throws LifecycleException
-   {
-      Utils.setup(manager, container);
-      Utils.start(manager, container);
-   }
+    static void execute(Manager manager, Container container) throws LifecycleException {
+        Utils.setup(manager, container);
+        Utils.start(manager, container);
+    }
 
 }

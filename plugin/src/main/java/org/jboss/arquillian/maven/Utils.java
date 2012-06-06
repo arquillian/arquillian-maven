@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -43,69 +43,53 @@ import org.jboss.shrinkwrap.api.Archive;
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
  */
-final class Utils
-{
-   private static Map<Archive<?>, Deployment> contextMap = new HashMap<Archive<?>, Deployment>();
-   
-   private Utils() { }
-   
-   public static void setup(Manager manager, Container container) throws LifecycleException
-   {
-      manager.fire(new SetupContainer(container));
-   }
-   
-   public static void start(Manager manager, Container container) throws LifecycleException
-   {
-      manager.fire(new StartContainer(container));
-   }
+final class Utils {
 
-   public static void stop(Manager manager, Container container) throws LifecycleException
-   {
-      manager.fire(new StopContainer(container));
-   }
+    private static Map<Archive<?>, Deployment> contextMap = new HashMap<Archive<?>, Deployment>();
 
-   public static void deploy(Manager manager, Container container, Archive<?> deployment) throws DeploymentException
-   {
-      manager.fire(new DeployDeployment(
-            container,
-            getOrCreateDeployment(deployment)),
-            new NonManagedObserver<DeployDeployment>()
-            {
-               @Inject
-               private Instance<ProtocolMetaData> metadataInst;
+    private Utils() {
+    }
 
-               @Override
-               public void fired(DeployDeployment event)
-               {
-                  ProtocolMetaData metadata = metadataInst.get();
-                  if(metadata != null)
-                  {
-                     System.out.println(metadata);
-                  }
-               }
-            });
-   }
+    public static void setup(Manager manager, Container container) throws LifecycleException {
+        manager.fire(new SetupContainer(container));
+    }
 
-   public static void undeploy(Manager manager, Container container, Archive<?> deployment) throws DeploymentException
-   {
-      manager.fire(new UnDeployDeployment(
-            container, 
-            getOrCreateDeployment(deployment)));
-   }
+    public static void start(Manager manager, Container container) throws LifecycleException {
+        manager.fire(new StartContainer(container));
+    }
 
-   private static Deployment getOrCreateDeployment(Archive<?> archive)
-   {
-      if(contextMap.containsKey(archive))
-      {
-         return contextMap.remove(archive);
-      }
-      else
-      {
-         Deployment deployment = new Deployment(
-               new DeploymentDescription("NO-NAME", archive));
-         contextMap.put(archive, deployment);
+    public static void stop(Manager manager, Container container) throws LifecycleException {
+        manager.fire(new StopContainer(container));
+    }
 
-         return deployment;
-      }
-   }
+    public static void deploy(Manager manager, Container container, Archive<?> deployment) throws DeploymentException {
+        manager.fire(new DeployDeployment(container, getOrCreateDeployment(deployment)),
+                new NonManagedObserver<DeployDeployment>() {
+                    @Inject
+                    private Instance<ProtocolMetaData> metadataInst;
+
+                    @Override
+                    public void fired(DeployDeployment event) {
+                        ProtocolMetaData metadata = metadataInst.get();
+                        if (metadata != null) {
+                            System.out.println(metadata);
+                        }
+                    }
+                });
+    }
+
+    public static void undeploy(Manager manager, Container container, Archive<?> deployment) throws DeploymentException {
+        manager.fire(new UnDeployDeployment(container, getOrCreateDeployment(deployment)));
+    }
+
+    private static Deployment getOrCreateDeployment(Archive<?> archive) {
+        if (contextMap.containsKey(archive)) {
+            return contextMap.remove(archive);
+        } else {
+            Deployment deployment = new Deployment(new DeploymentDescription("NO-NAME", archive));
+            contextMap.put(archive, deployment);
+
+            return deployment;
+        }
+    }
 }

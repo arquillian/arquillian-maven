@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -40,32 +40,29 @@ import org.junit.runner.RunWith;
  * @version $Revision: $
  */
 @RunWith(Arquillian.class)
-public class MySimpleServletTestCase
-{
-   @Deployment(testable = false)
-   public static WebArchive createDeployment()
-   {
-      String servletName = MySimpleServlet.class.getSimpleName();
-      return ShrinkWrap.create(WebArchive.class)
-               .addClass(MySimpleServlet.class)
-               .setWebXML(new StringAsset(
-                     Descriptors.create(WebAppDescriptor.class)
-                        .createServlet()
-                           .servletName(servletName)
-                           .servletClass(MySimpleServlet.class.getName())
-                           .up()
-                        .createServletMapping()
-                           .servletName(servletName)
-                           .urlPattern("/*")
-                           .up()
-                        .exportAsString()
-               ));
-   }
-   
-   @Test
-   public void shouldBeAbleToCallServlet(@ArquillianResource(MySimpleServlet.class) URL baseURL) throws Exception 
-   {
-      String result = read(new URL(baseURL + "Test"));
-      Assert.assertEquals(MySimpleServlet.WELCOME_MSG, result);
-   }
+public class MySimpleServletTestCase {
+    @Deployment(testable = false)
+    public static WebArchive createDeployment() {
+        String servletName = MySimpleServlet.class.getSimpleName();
+        return ShrinkWrap.create(WebArchive.class)
+                .addClass(MySimpleServlet.class)
+                .setWebXML(new StringAsset(
+                      Descriptors.create(WebAppDescriptor.class)
+                         .createServlet()
+                            .servletName(servletName)
+                            .servletClass(MySimpleServlet.class.getName())
+                            .up()
+                         .createServletMapping()
+                            .servletName(servletName)
+                            .urlPattern("/*")
+                            .up()
+                         .exportAsString()
+                ));
+    }
+
+    @Test
+    public void shouldBeAbleToCallServlet(@ArquillianResource(MySimpleServlet.class) URL baseURL) throws Exception {
+        String result = read(new URL(baseURL + "Test"));
+        Assert.assertEquals(MySimpleServlet.WELCOME_MSG, result);
+    }
 }

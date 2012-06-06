@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -27,41 +27,42 @@ import org.jboss.shrinkwrap.api.Archive;
  * Deploy to a Container
  *
  * @goal deploy
- * 
+ *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @version $Revision: $
- * 
+ *
  */
-public final class Deploy extends BaseCommand
-{
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "deploy";
-   }
+public final class Deploy extends BaseCommand {
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "deploy";
+    }
 
-   @Override
-   Manager startNewManager(Class<?>... extensions)
-   {
-      throw new RuntimeException("Container not started. The container must be started before deploy. If the container is remote sue \"arquillian:deployRemote\""); 
-   }
+    @Override
+    Manager startNewManager(Class<?>... extensions) {
+        throw new RuntimeException(
+                "Container not started. The container must be started before deploy. If the container is remote sue \"arquillian:deployRemote\"");
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
-    */
-   @Override
-   public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException
-   {
-      Archive<?> deployment = createDeployment();
-      getLog().info("Perform deploy on " + container.getName() + " of deployment " + deployment.getName());
-      execute(manager, container, deployment);
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
+     */
+    @Override
+    public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException {
+        Archive<?> deployment = createDeployment();
+        getLog().info("Perform deploy on " + container.getName() + " of deployment " + deployment.getName());
+        execute(manager, container, deployment);
+    }
 
-   static void execute(Manager manager, Container container, Archive<?> deployment) throws DeploymentException
-   {
-      Utils.deploy(manager, container, deployment);
-   }
+    static void execute(Manager manager, Container container, Archive<?> deployment) throws DeploymentException {
+        Utils.deploy(manager, container, deployment);
+    }
 }

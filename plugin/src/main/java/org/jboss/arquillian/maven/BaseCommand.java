@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -41,307 +41,274 @@ import org.jboss.shrinkwrap.api.importer.ZipImporter;
 
 /**
  * BaseCommand
- * 
+ *
  * @author <a href="mailto:aslak@redhat.com">Aslak Knutsen</a>
  * @author Davide D'Alto
  * @version $Revision: $
- * 
+ *
  * @requiresDependencyResolution test
  */
-abstract class BaseCommand extends AbstractMojo
-{
-   private static final String ARQUILLIAN_XML_SYS_PROP = "arquillian.xml";
+abstract class BaseCommand extends AbstractMojo {
+    private static final String ARQUILLIAN_XML_SYS_PROP = "arquillian.xml";
 
-   private static final String LOADABLE_EXTESION_LOADER_CLASS = "org.jboss.arquillian.core.impl.loadable.LoadableExtensionLoader";
-   
-   public enum ClassLoadingStrategy 
-   {
-      COMPILE,
-      TEST,
-      PLUGIN
-   }
-   
-   /**
-    * The maven project.
-    *
-    * @parameter expression="${project}"
-    */
-   private MavenProject project;
+    private static final String LOADABLE_EXTESION_LOADER_CLASS = "org.jboss.arquillian.core.impl.loadable.LoadableExtensionLoader";
 
-   /**
-    * The ClassLoading strategy to use: TEST, COMPILE or PLUGIN.
-    * 
-    * @parameter property="classloading"
-    */
-   private ClassLoadingStrategy classLoadingStrategy = ClassLoadingStrategy.TEST; 
+    public enum ClassLoadingStrategy {
+        COMPILE, TEST, PLUGIN
+    }
 
-   /**
-    * @param classLoadingStrategy the classLoadingStrategy to set
-    */
-   public void setClassloading(String classloading)
-   {
-      this.classLoadingStrategy = ClassLoadingStrategy.valueOf(classloading.toUpperCase());
-   }
-   
-   /**
-    * The target directory the application to be deployed is located.
-    *
-    * @parameter expression="${echo.target}" default-value="${project.build.directory}/"
-    */
-   private File targetDir;
+    /**
+     * The maven project.
+     *
+     * @parameter expression="${project}"
+     */
+    private MavenProject project;
 
-   /**
-    * The file name of the application to be deployed.
-    *
-    * @parameter expression="${echo.filename}" default-value="${project.build.finalName}.${project.packaging}"
-    */
-   private String filename;
+    /**
+     * The ClassLoading strategy to use: TEST, COMPILE or PLUGIN.
+     *
+     * @parameter property="classloading"
+     */
+    private ClassLoadingStrategy classLoadingStrategy = ClassLoadingStrategy.TEST;
 
-   /**
-    * Location of the arquillian configuration file. It can be set either as location on the file system (Ex: ${basedir}/test/arquillian4test.xml)
-    * or as a resource in the classpath (Ex: /arquillian4test.xml).
-    *
-    * @parameter expression="${arquillian.xml}"
-    */
-   private String arquillianXml;
+    /**
+     * @param classLoadingStrategy the classLoadingStrategy to set
+     */
+    public void setClassloading(String classloading) {
+        this.classLoadingStrategy = ClassLoadingStrategy.valueOf(classloading.toUpperCase());
+    }
 
-   /**
-    * The target directory the archive is located. The default is {@code project.build.directory}.
-    *
-    * @return the target directory the archive is located.
-    */
-   public final File targetDirectory()
-   {
-      return targetDir;
-   }
+    /**
+     * The target directory the application to be deployed is located.
+     *
+     * @parameter expression="${echo.target}" default-value="${project.build.directory}/"
+     */
+    private File targetDir;
 
-   /**
-    * The file name of the archive not including the directory. The default is
-    * {@code project.build.finalName + . + project.packaging}
-    *
-    * @return the file name of the archive.
-    */
-   public final String filename()
-   {
-      return filename;
-   }
+    /**
+     * The file name of the application to be deployed.
+     *
+     * @parameter expression="${echo.filename}" default-value="${project.build.finalName}.${project.packaging}"
+     */
+    private String filename;
 
-   /**
-    * The archive file.
-    *
-    * @return the archive file.
-    */
-   public final File file()
-   {
-      return new File(targetDir, filename);
-   }
+    /**
+     * Location of the arquillian configuration file. It can be set either as location on the file system (Ex:
+     * ${basedir}/test/arquillian4test.xml) or as a resource in the classpath (Ex: /arquillian4test.xml).
+     *
+     * @parameter expression="${arquillian.xml}"
+     */
+    private String arquillianXml;
 
-   /**
-    * Return the value of the arquillianXml configuration property.
-    */
-   public final String arquillianXml()
-   {
-      return arquillianXml;
-   }
+    /**
+     * The target directory the archive is located. The default is {@code project.build.directory}.
+     *
+     * @return the target directory the archive is located.
+     */
+    public final File targetDirectory() {
+        return targetDir;
+    }
 
-   /**
-    * The goal of the deployment.
-    *
-    * @return the goal of the deployment.
-    */
-   public abstract String goal();
+    /**
+     * The file name of the archive not including the directory. The default is
+     * {@code project.build.finalName + . + project.packaging}
+     *
+     * @return the file name of the archive.
+     */
+    public final String filename() {
+        return filename;
+    }
 
-   /**
-    * Perform the defined goal, e.g. deploy / run / undeploy
-    * 
-    * @param container The chosen container to operate on
-    * @throws LifecycleException
-    * @throws DeploymentException
-    */
-   public abstract void perform(Manager manager, Container container) throws DeploymentException, LifecycleException;
+    /**
+     * The archive file.
+     *
+     * @return the archive file.
+     */
+    public final File file() {
+        return new File(targetDir, filename);
+    }
 
-   /* (non-Javadoc)
-    * @see org.apache.maven.plugin.Mojo#execute()
-    */
-   @Override
-   public void execute() throws MojoExecutionException, MojoFailureException
-   {
-      validateInput();
-      initArquillianXml();
+    /**
+     * Return the value of the arquillianXml configuration property.
+     */
+    public final String arquillianXml() {
+        return arquillianXml;
+    }
 
-      getLog().info("Using configuration: " + System.getProperty(ARQUILLIAN_XML_SYS_PROP));
-      getLog().info(goal() + " file: " + file().getAbsoluteFile());
+    /**
+     * The goal of the deployment.
+     *
+     * @return the goal of the deployment.
+     */
+    public abstract String goal();
 
-      ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
-      try
-      {
-         ClassLoader cl = getClassLoader();
-         Thread.currentThread().setContextClassLoader(cl);
-         
-         Class<?> extension = cl.loadClass(LOADABLE_EXTESION_LOADER_CLASS);
-         
-         loadContainer(extension);
-      }
-      catch (Exception e) 
-      {
-         throw new MojoExecutionException("Could not perform goal: " + goal() + " on file " + file(), e);
-      }
-      finally
-      {
-         Thread.currentThread().setContextClassLoader(previousCL);
-      }
-   }
+    /**
+     * Perform the defined goal, e.g. deploy / run / undeploy
+     *
+     * @param container The chosen container to operate on
+     * @throws LifecycleException
+     * @throws DeploymentException
+     */
+    public abstract void perform(Manager manager, Container container) throws DeploymentException, LifecycleException;
 
-   void initArquillianXml()
-   {
-      if (arquillianXml() != null) {
-         System.setProperty(ARQUILLIAN_XML_SYS_PROP, arquillianXml());
-      }
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.apache.maven.plugin.Mojo#execute()
+     */
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        validateInput();
+        initArquillianXml();
 
-   void validateInput()
-   {
-      File deploymentFile = file();
-      if (!deploymentFile.exists())
-      {
-         throw new IllegalArgumentException("Specified file does not exist:" + deploymentFile
-               + ". Verify 'target' and 'filename' configuration.");
-      }
-      
-      if( (classLoadingStrategy == ClassLoadingStrategy.TEST || classLoadingStrategy == ClassLoadingStrategy.COMPILE) && project == null)
-      {
-         throw new IllegalArgumentException("Can not use 'classloading' strategy " + classLoadingStrategy + " outside a project");
-      }
-   }
+        getLog().info("Using configuration: " + System.getProperty(ARQUILLIAN_XML_SYS_PROP));
+        getLog().info(goal() + " file: " + file().getAbsoluteFile());
 
-   private void loadContainer(Class<?>... extensions) throws Exception
-   {
-      Manager manager = startManager(extensions);
-      try
-      {
-         perform(manager, selectContainer(manager));
-      }
-      catch (Exception e)
-      {
-         manager.shutdown();
-         throw e;
-      }
-   }
+        ClassLoader previousCL = Thread.currentThread().getContextClassLoader();
+        try {
+            ClassLoader cl = getClassLoader();
+            Thread.currentThread().setContextClassLoader(cl);
 
-   private Manager startManager(Class<?>... extensions)
-   {
-      Manager manager = getFromContext(Manager.class);
-      if (isStarted(manager))
-         return manager;
+            Class<?> extension = cl.loadClass(LOADABLE_EXTESION_LOADER_CLASS);
 
-      manager = startNewManager(extensions);
-      putInContext(Manager.class, manager);
-      return manager;
-   }
+            loadContainer(extension);
+        } catch (Exception e) {
+            throw new MojoExecutionException("Could not perform goal: " + goal() + " on file " + file(), e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(previousCL);
+        }
+    }
 
-   private boolean isStarted(Manager manager)
-   {
-      return manager != null;
-   }
+    void initArquillianXml() {
+        if (arquillianXml() != null) {
+            System.setProperty(ARQUILLIAN_XML_SYS_PROP, arquillianXml());
+        }
+    }
 
-   Manager startNewManager(Class<?>... extensions)
-   {
-      Manager manager = ManagerBuilder.from().extensions(extensions).create();
-      manager.start();
-      return manager;
-   }
+    void validateInput() {
+        File deploymentFile = file();
+        if (!deploymentFile.exists()) {
+            throw new IllegalArgumentException("Specified file does not exist:" + deploymentFile
+                    + ". Verify 'target' and 'filename' configuration.");
+        }
 
-   private Container selectContainer(Manager manager)
-   {
-      // TODO: Add support for multi configuration
-      Container container = createRegistry(manager).getContainer(TargetDescription.DEFAULT);
-      getLog().info("to container: " + container.getName());
-      return container;
-   }
+        if ((classLoadingStrategy == ClassLoadingStrategy.TEST || classLoadingStrategy == ClassLoadingStrategy.COMPILE)
+                && project == null) {
+            throw new IllegalArgumentException("Can not use 'classloading' strategy " + classLoadingStrategy
+                    + " outside a project");
+        }
+    }
 
-   Archive<?> createDeployment()
-   {
-      getLog().info(goal() + " file: " + file().getAbsoluteFile());
+    private void loadContainer(Class<?>... extensions) throws Exception {
+        Manager manager = startManager(extensions);
+        try {
+            perform(manager, selectContainer(manager));
+        } catch (Exception e) {
+            manager.shutdown();
+            throw e;
+        }
+    }
 
-      File deploymentFile = file();
-      Archive<?> deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName())
-            .importFrom(deploymentFile).as(GenericArchive.class);
-      return deployment;
-   }
+    private Manager startManager(Class<?>... extensions) {
+        Manager manager = getFromContext(Manager.class);
+        if (isStarted(manager))
+            return manager;
 
-   private ContainerRegistry createRegistry(Manager manager)
-   {
-      ContainerRegistry registry = getFromContext(ContainerRegistry.class);
-      if (registry != null)
-         return registry;
+        manager = startNewManager(extensions);
+        putInContext(Manager.class, manager);
+        return manager;
+    }
 
-      registry = manager.resolve(ContainerRegistry.class);
-      validateRegistry(registry);
-      putInContext(ContainerRegistry.class, registry);
-      return registry;
-   }
+    private boolean isStarted(Manager manager) {
+        return manager != null;
+    }
 
-   private void validateRegistry(ContainerRegistry registry)
-   {
-      if (registry == null)
-      {
-         throw new IllegalStateException(
-               "No ContainerRegistry found in Context. Something is wrong with the classpath.....");
-      }
+    Manager startNewManager(Class<?>... extensions) {
+        Manager manager = ManagerBuilder.from().extensions(extensions).create();
+        manager.start();
+        return manager;
+    }
 
-      if (registry.getContainers().size() == 0)
-      {
-         throw new IllegalStateException(
-               "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
-      }
-   }
+    private Container selectContainer(Manager manager) {
+        // TODO: Add support for multi configuration
+        Container container = createRegistry(manager).getContainer(TargetDescription.DEFAULT);
+        getLog().info("to container: " + container.getName());
+        return container;
+    }
 
-   protected ClassLoader getClassLoader() throws Exception
-   {
-      ClassLoader classLoader = getFromContext(ClassLoader.class);
-      if (classLoader != null)
-         return classLoader;
+    Archive<?> createDeployment() {
+        getLog().info(goal() + " file: " + file().getAbsoluteFile());
 
-      synchronized (BaseCommand.class)
-      {
-         List<URL> urls = new ArrayList<URL>();
-         List<String> classPathElements;
-         
-         switch (classLoadingStrategy)
-         {
-            case COMPILE :
-               classPathElements = project.getCompileClasspathElements();
-               break;
-            case TEST :
-               classPathElements = project.getTestClasspathElements();
-               break;
-            case PLUGIN :
-               classPathElements = new ArrayList<String>();
-               break;
+        File deploymentFile = file();
+        Archive<?> deployment = ShrinkWrap.create(ZipImporter.class, deploymentFile.getName()).importFrom(deploymentFile)
+                .as(GenericArchive.class);
+        return deployment;
+    }
 
-            default :
-               classPathElements = new ArrayList<String>();
-               break;
-         }
+    private ContainerRegistry createRegistry(Manager manager) {
+        ContainerRegistry registry = getFromContext(ContainerRegistry.class);
+        if (registry != null)
+            return registry;
 
-         for (String object : classPathElements)
-         {
-            String path = (String) object;
-            urls.add(new File(path).toURI().toURL());
-         }
-         URLClassLoader urlClassLoader = new URLClassLoader(urls.toArray(new URL[]{}), BaseCommand.class.getClassLoader());
-         putInContext(ClassLoader.class, urlClassLoader);
-         return urlClassLoader;
-      }
-   }
+        registry = manager.resolve(ContainerRegistry.class);
+        validateRegistry(registry);
+        putInContext(ContainerRegistry.class, registry);
+        return registry;
+    }
 
-   @SuppressWarnings("unchecked")
-   <T> T getFromContext(Class<T> key) {
-      return (T) getPluginContext().get(key);
-   }
+    private void validateRegistry(ContainerRegistry registry) {
+        if (registry == null) {
+            throw new IllegalStateException("No ContainerRegistry found in Context. Something is wrong with the classpath.....");
+        }
 
-   @SuppressWarnings("unchecked")
-   <T> T putInContext(Class<T> key, T value) {
-      return (T) getPluginContext().put(key, value);
-   }
+        if (registry.getContainers().size() == 0) {
+            throw new IllegalStateException(
+                    "No Containers in registry. You need to add the Container Adaptor dependencies to the plugin dependency section");
+        }
+    }
+
+    protected ClassLoader getClassLoader() throws Exception {
+        ClassLoader classLoader = getFromContext(ClassLoader.class);
+        if (classLoader != null)
+            return classLoader;
+
+        synchronized (BaseCommand.class) {
+            List<URL> urls = new ArrayList<URL>();
+            List<String> classPathElements;
+
+            switch (classLoadingStrategy) {
+                case COMPILE:
+                    classPathElements = project.getCompileClasspathElements();
+                    break;
+                case TEST:
+                    classPathElements = project.getTestClasspathElements();
+                    break;
+                case PLUGIN:
+                    classPathElements = new ArrayList<String>();
+                    break;
+
+                default:
+                    classPathElements = new ArrayList<String>();
+                    break;
+            }
+
+            for (String object : classPathElements) {
+                String path = (String) object;
+                urls.add(new File(path).toURI().toURL());
+            }
+            URLClassLoader urlClassLoader = new URLClassLoader(urls.toArray(new URL[] {}), BaseCommand.class.getClassLoader());
+            putInContext(ClassLoader.class, urlClassLoader);
+            return urlClassLoader;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    <T> T getFromContext(Class<T> key) {
+        return (T) getPluginContext().get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    <T> T putInContext(Class<T> key, T value) {
+        return (T) getPluginContext().put(key, value);
+    }
 }

@@ -24,8 +24,7 @@ import org.jboss.arquillian.core.spi.Manager;
 import org.jboss.shrinkwrap.api.Archive;
 
 /**
- * UnDeploy to a remote container.
- * Start and stop the container before and after the undeploy.
+ * UnDeploy to a remote container. Start and stop the container before and after the undeploy.
  *
  * @goal undeployRemote
  *
@@ -33,43 +32,44 @@ import org.jboss.shrinkwrap.api.Archive;
  * @version $Revision: $
  *
  */
-public final class UndeployRemote extends BaseCommand
-{
-   private boolean managerStartedByMe = false;
+public final class UndeployRemote extends BaseCommand {
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "undeployRemote";
-   }
+    private boolean managerStartedByMe = false;
 
-   Manager startNewManager(Class<?>... extensions)
-   {
-      managerStartedByMe = true;
-      return super.startNewManager(extensions);
-   };
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "undeployRemote";
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
-    */
-   @Override
-   public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException
-   {
-      if (managerStartedByMe)
-         Start.execute(manager, container);
+    Manager startNewManager(Class<?>... extensions) {
+        managerStartedByMe = true;
+        return super.startNewManager(extensions);
+    };
 
-      undeploy(manager, container);
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
+     */
+    @Override
+    public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException {
+        if (managerStartedByMe)
+            Start.execute(manager, container);
 
-      Stop.execute(manager, container);
-   }
+        undeploy(manager, container);
 
-   private void undeploy(Manager manager, Container container) throws DeploymentException
-   {
-      final Archive<?> deployment = createDeployment();
-      getLog().info("Perform undeploy on " + container.getName() + " of deployment " + deployment.getName());
-      Undeploy.execute( manager, container, deployment );
-   }
+        Stop.execute(manager, container);
+    }
+
+    private void undeploy(Manager manager, Container container) throws DeploymentException {
+        final Archive<?> deployment = createDeployment();
+        getLog().info("Perform undeploy on " + container.getName() + " of deployment " + deployment.getName());
+        Undeploy.execute(manager, container, deployment);
+    }
 }

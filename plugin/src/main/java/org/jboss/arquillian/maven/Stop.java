@@ -29,48 +29,46 @@ import org.jboss.arquillian.core.spi.Manager;
  * @version $Revision: $
  *
  */
-public final class Stop extends BaseCommand
-{
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "stop";
-   }
+public final class Stop extends BaseCommand {
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#validateInput()
-    */
-   @Override
-   void validateInput()
-   {
-      // No need to validate when stopping
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "stop";
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container)
-    */
-   @Override
-   public void perform(Manager manager, Container container)
-   {
-      execute(manager, container);
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#validateInput()
+     */
+    @Override
+    void validateInput() {
+        // No need to validate when stopping
+    }
 
-   static void execute(Manager manager, Container container)
-   {
-      try
-      {
-         Utils.stop(manager, container);
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
-      finally
-      {
-         manager.shutdown();
-      }
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container)
+     */
+    @Override
+    public void perform(Manager manager, Container container) {
+        execute(manager, container);
+    }
+
+    static void execute(Manager manager, Container container) {
+        try {
+            Utils.stop(manager, container);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            manager.shutdown();
+        }
+    }
 }
