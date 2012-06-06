@@ -23,7 +23,7 @@
 
     <properties>
         <version.maven>3.0</version.maven>
-        <version.arquillian_core>1.0.0.CR7</version.arquillian_core>
+        <version.arquillian_core>1.0.1.Final</version.arquillian_core>
 
         <version.jboss_spec>1.0.0.Final</version.jboss_spec>
 
