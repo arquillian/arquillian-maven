@@ -10,7 +10,7 @@
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,  
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -32,35 +32,37 @@ import org.jboss.shrinkwrap.api.Archive;
  * @version $Revision: $
  *
  */
-public final class Undeploy extends BaseCommand
-{
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#goal()
-    */
-   @Override
-   public String goal()
-   {
-      return "undeploy";
-   }
+public final class Undeploy extends BaseCommand {
 
-   Manager startNewManager(Class<?>... extensions)
-   {
-      throw new RuntimeException("Container not started. The container must be started before undeploy. If the container is remote sue \"arquillian:undeployRemote\"");
-   };
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#goal()
+     */
+    @Override
+    public String goal() {
+        return "undeploy";
+    }
 
-   /* (non-Javadoc)
-    * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager, org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
-    */
-   @Override
-   public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException
-   {
-      final Archive<?> deployment = createDeployment();
-      getLog().info("Perform undeploy on " + container.getName() + " of deployment " + deployment.getName());
-      execute(manager, container, deployment);
-   }
+    Manager startNewManager(Class<?>... extensions) {
+        throw new RuntimeException(
+                "Container not started. The container must be started before undeploy. If the container is remote sue \"arquillian:undeployRemote\"");
+    };
 
-   static void execute(Manager manager, Container container, final Archive<?> deployment) throws DeploymentException
-   {
-      Utils.undeploy(manager, container, deployment);
-   }
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.jboss.arquillian.maven.BaseCommand#perform(org.jboss.arquillian.core.spi.Manager,
+     * org.jboss.arquillian.container.spi.Container, org.jboss.shrinkwrap.api.Archive)
+     */
+    @Override
+    public void perform(final Manager manager, final Container container) throws DeploymentException, LifecycleException {
+        final Archive<?> deployment = createDeployment();
+        getLog().info("Perform undeploy on " + container.getName() + " of deployment " + deployment.getName());
+        execute(manager, container, deployment);
+    }
+
+    static void execute(Manager manager, Container container, final Archive<?> deployment) throws DeploymentException {
+        Utils.undeploy(manager, container, deployment);
+    }
 }

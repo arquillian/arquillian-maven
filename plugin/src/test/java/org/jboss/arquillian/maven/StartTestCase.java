@@ -20,13 +20,11 @@ package org.jboss.arquillian.maven;
 /**
  * @author Davide D'Alto
  */
-public final class StartTestCase extends BaseCommandTestBase
-{
+public final class StartTestCase extends BaseCommandTestBase {
 
-   @Override
-   public String goal()
-   {
-      return "start";
-   }
+    @Override
+    public String goal() {
+        return "start";
+    }
 
 }

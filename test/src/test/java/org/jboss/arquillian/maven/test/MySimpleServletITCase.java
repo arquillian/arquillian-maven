@@ -33,20 +33,17 @@ import org.junit.Test;
  * @author Davide D'Alto
  * @version $Revision: $
  */
-public class MySimpleServletITCase
-{
-   @Test
-   public void shouldBeAbleToCallServlet() throws Exception
-   {
-      String url = "http://127.0.0.1:" + servletPort() + "/arquillian-maven/hello";
-      String result = read(new URL(url));
-      Assert.assertEquals(MySimpleServlet.WELCOME_MSG, result);
-   }
+public class MySimpleServletITCase {
+    @Test
+    public void shouldBeAbleToCallServlet() throws Exception {
+        String url = "http://127.0.0.1:" + servletPort() + "/arquillian-maven/hello";
+        String result = read(new URL(url));
+        Assert.assertEquals(MySimpleServlet.WELCOME_MSG, result);
+    }
 
-   private String servletPort() throws IOException
-   {
-      Properties properties = new Properties();
-      properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("test.properties"));
-      return properties.getProperty("servlet.port");
-   }
+    private String servletPort() throws IOException {
+        Properties properties = new Properties();
+        properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("test.properties"));
+        return properties.getProperty("servlet.port");
+    }
 }

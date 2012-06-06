@@ -20,13 +20,11 @@ package org.jboss.arquillian.maven;
 /**
  * @author Davide D'Alto
  */
-public final class UndeployTestCase extends BaseCommandTestBase
-{
+public final class UndeployTestCase extends BaseCommandTestBase {
 
-   @Override
-   public String goal()
-   {
-      return "undeploy";
-   }
+    @Override
+    public String goal() {
+        return "undeploy";
+    }
 
 }
