@@ -28,7 +28,7 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.descriptor.api.Descriptors;
-import org.jboss.shrinkwrap.descriptor.api.spec.servlet.web.WebAppDescriptor;
+import org.jboss.shrinkwrap.descriptor.api.webapp30.WebAppDescriptor;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,11 +45,19 @@ public class MySimpleServletTestCase
    @Deployment(testable = false)
    public static WebArchive createDeployment()
    {
+      String servletName = MySimpleServlet.class.getSimpleName();
       return ShrinkWrap.create(WebArchive.class)
                .addClass(MySimpleServlet.class)
                .setWebXML(new StringAsset(
                      Descriptors.create(WebAppDescriptor.class)
-                        .servlet(MySimpleServlet.class, "/*")
+                        .createServlet()
+                           .servletName(servletName)
+                           .servletClass(MySimpleServlet.class.getName())
+                           .up()
+                        .createServletMapping()
+                           .servletName(servletName)
+                           .urlPattern("/*")
+                           .up()
                         .exportAsString()
                ));
    }

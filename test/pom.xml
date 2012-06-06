@@ -17,7 +17,6 @@
     <properties>
         <version.arquillian_jetty>1.0.0.CR1</version.arquillian_jetty>
         <version.arquillian_jbossas7>7.0.2.Final</version.arquillian_jbossas7>
-        <version.shrinkwrap_descriptors>1.1.0-alpha-2</version.shrinkwrap_descriptors>
         <version.jetty>8.0.0.M3</version.jetty>
     </properties>
 
@@ -34,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-            <artifactId>shrinkwrap-descriptors-impl</artifactId>
+            <artifactId>shrinkwrap-descriptors-impl-javaee</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
