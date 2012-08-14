@@ -46,7 +46,7 @@ public final class Deploy extends BaseCommand {
     @Override
     Manager startNewManager(Class<?>... extensions) {
         throw new RuntimeException(
-                "Container not started. The container must be started before deploy. If the container is remote sue \"arquillian:deployRemote\"");
+                "Container not started. The container must be started before deploy. If the container is remote use \"arquillian:deployRemote\"");
     }
 
     /*
