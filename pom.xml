@@ -6,7 +6,7 @@
     <parent>
         <artifactId>jboss-parent</artifactId>
         <groupId>org.jboss</groupId>
-        <version>8</version>
+        <version>34</version>
     </parent>
 
     <groupId>org.jboss.arquillian.maven</groupId>
